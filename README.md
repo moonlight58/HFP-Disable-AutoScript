@@ -31,7 +31,7 @@ Ce script automatise la désactivation du service HFP **à chaque connexion du c
 
 ## 📜 Script PowerShell
 
-Créer un fichier `Disable-HFP.ps1` avec le contenu suivant :
+Un fichier `Disable-HFP.ps1`  avec le contenu suivant :
 
 ```powershell
 # === CONFIGURATION ===
@@ -155,7 +155,7 @@ This script automates disabling the HFP service **each time the headset connects
 
 ## 📜 PowerShell Script
 
-Create a file named `Disable-HFP.ps1` with the following content:
+Use the file named `Disable-HFP.ps1` with the following content:
 
 ```powershell
 # === CONFIGURATION ===
