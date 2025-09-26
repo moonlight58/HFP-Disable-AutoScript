@@ -1,3 +1,12 @@
+<div align="center">
+  <h2>Choose your language please</h2>
+  <h1> 🇫🇷 <a href="#fr">FR</a> / 🇬🇧 <a href="#en">EN</a></h1>
+</div>
+
+---
+
+<a id="fr"></a>
+
 # Auto-Disable Bluetooth Hands-Free Telephony on Windows
 
 ## 🎯 Objectif
@@ -117,3 +126,127 @@ foreach ($device in $targetDevices) {
   ```
 
 - En cas de souci, tester d’abord le script manuellement avant de l’automatiser.
+
+---
+
+<a id="en"></a>
+
+# Auto-Disable Bluetooth Hands-Free Telephony on Windows
+
+## 🎯 Purpose
+
+Some Bluetooth headsets appear in Windows with two audio profiles:
+
+- **A2DP (Stereo)** → good quality audio
+- **HFP/HSP (Hands-Free Telephony)** → microphone enabled but poor audio quality
+
+By default, Windows may automatically switch to the "Hands-Free Telephony" profile when the headset connects, which breaks sound quality.  
+This script automates disabling the HFP service **each time the headset connects**.
+
+---
+
+## ⚙️ Requirements
+
+- **PowerShell** (included with Windows 10/11)
+- **Bluetooth Command Line Tools** installed and available in your `PATH`  
+  👉 [Bluetooth Command Line Tools](https://bluetoothinstaller.com/bluetooth-command-line-tools)
+
+---
+
+## 📜 PowerShell Script
+
+Create a file named `Disable-HFP.ps1` with the following content:
+
+```powershell
+# === CONFIGURATION ===
+$targetDevices = @(
+    "JBL TUNE760NC",
+    "CMF Buds"
+)
+
+# btcom command name (adapt if full path is needed, e.g.: C:\BluetoothTools\btcom.exe)
+$btcom = "btcom"
+
+foreach ($device in $targetDevices) {
+    # Check if the Bluetooth device is present and connected
+    $status = Get-PnpDevice | Where-Object {
+        $_.FriendlyName -like "*$device*" -and $_.Status -eq "OK"
+    }
+
+    if ($status) {
+        Write-Output "✅ Device '$device' detected and connected. Disabling HFP profile..."
+        Start-Process $btcom -ArgumentList @("-n", "`"$device`"", "-r", "-s111e") -NoNewWindow -Wait
+    } else {
+        Write-Output "ℹ️ Device '$device' not connected. Nothing to do."
+    }
+}
+```
+
+👉 Edit the **CONFIGURATION** section to list the exact names of your headsets.
+
+---
+
+## 🚀 Automation with Task Scheduler (Option B)
+
+1. **Open Event Viewer**
+
+   - `Win + R` → type `eventvwr.msc`
+   - Go to:
+     `Applications and Services Logs → Microsoft → Windows → Bluetooth-BthMini → Operations`
+
+2. **Identify the connection event**
+
+3. **Connect your headset**
+
+   - Observe which Event ID appears exactly when the headset connects
+     - For many headsets, it's often **ID 22** or **ID 21**
+     - Note the ID and description → this will be your trigger in Task Scheduler
+
+4. **Create a scheduled task**
+
+   - Open **Task Scheduler** (`taskschd.msc`)
+   - _Create a task_ (not a basic task)
+
+   **Triggers Tab**
+
+   - New → Begin the task: _On an event_
+   - Log: `Microsoft-Windows-Bluetooth/Bluetooth-BthMini`
+   - Source: `Bluetooth` (or the exact name shown in the Source column)
+   - Event ID: the one you observed when connecting the headset
+
+   **Actions Tab**
+
+   - New action → _Start a program_
+   - Program: `powershell.exe`
+   - Arguments:
+
+     ```bash
+     -ExecutionPolicy Bypass -File "C:\Scripts\Disable-HFP.ps1"
+     ```
+
+   **Conditions Tab**
+
+   - Uncheck _Start the task only if the computer is on AC power_ (for laptops).
+
+   **General Tab**
+
+   - Check _Run with highest privileges_.
+
+5. **Test**
+
+   - Turn your Bluetooth headset off/on
+   - Check in the terminal or Task Scheduler logs that the task runs
+   - The **Hands-Free Telephony** profile should disappear automatically.
+
+---
+
+## 📌 Notes
+
+- You can add multiple headsets in `$targetDevices`.
+- To manually re-enable HFP:
+
+  ```powershell
+  btcom -n "HeadsetName" -a -s111e
+  ```
+
+- If you have issues, test the script manually before automating it.
