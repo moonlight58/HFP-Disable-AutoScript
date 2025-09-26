@@ -97,7 +97,7 @@ foreach ($device in $targetDevices) {
    - Arguments :
 
      ```bash
-     -ExecutionPolicy Bypass -File "C:\Scripts\Disable-HFP.ps1"
+     -ExecutionPolicy Bypass -File "Le\Chemin\Du\Fichier"
      ```
 
    **Onglet Conditions**
@@ -221,7 +221,7 @@ foreach ($device in $targetDevices) {
    - Arguments:
 
      ```bash
-     -ExecutionPolicy Bypass -File "C:\Scripts\Disable-HFP.ps1"
+     -ExecutionPolicy Bypass -File "Path\Of\The\File"
      ```
 
    **Conditions Tab**
